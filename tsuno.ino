@@ -5,9 +5,10 @@ void setup() {
   // 0:OC0A - RGB output R
   // 1:OC0B - RGB output G
   // 4:OC1B - RGB output B
-  // 2:PINB2 - digital input
   // 3:PINB3 - digital input
   DDRB = 0b00010011;
+  // pullup pin 3
+  PORTB = 0b00001000;
   
   // save power
   PRR = (1 << PRUSI);
@@ -26,13 +27,32 @@ void setup() {
   OCR1C = 255;  // Set CTC match value for 8-bit resolution like Timer0
 
   // turn off outputs
-  OCR0A = 255; // R (inverted)
-  OCR0B = 255; // G (inverted)
-  OCR1B = 255; // B (inverted)
+  setRGB(0,0,0);
+
+  selfTest();
+}
+
+void selfTest(){
+  // output 7 non-mixed colors
+  setRGB(255,0,0);
+  delay(250);
+  // setRGB(0,255,0);
+  // delay(250);
+  // setRGB(0,0,255);
+  // delay(250);
+  // setRGB(255,255,0);
+  // delay(250);
+  // setRGB(255,0,255);
+  // delay(250);
+  // setRGB(0,255,255);
+  // delay(250);
+  // setRGB(255,255,255);
+  // delay(250);
+  setRGB(0,0,0); 
 }
 
 // valid inputs are 0-255 to set a value, and anything outside that to no-op that color
-int16_t COLOR_NO_OP = -1; 
+const int16_t COLOR_NO_OP = -1; 
 void setRGB(int16_t r, int16_t g, int16_t b){
     if (r >= 0 && r <= 255) {
         OCR0A = 255 - r; // Inverted output for R
@@ -59,7 +79,10 @@ void blink() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  blink();
-  // delay(1000);
+  // is pin 3 pulled down by the switch?
+  if (PINB & (1 << PINB3)){
+    delay(250);
+  } else {
+    blink();
+  }
 }
