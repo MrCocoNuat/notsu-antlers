@@ -34,20 +34,20 @@ void setup() {
 
 void selfTest(){
   // output 7 non-mixed colors
-  setRGB(255,0,0);
-  delay(250);
-  // setRGB(0,255,0);
-  // delay(250);
-  // setRGB(0,0,255);
-  // delay(250);
-  // setRGB(255,255,0);
-  // delay(250);
-  // setRGB(255,0,255);
-  // delay(250);
-  // setRGB(0,255,255);
-  // delay(250);
-  // setRGB(255,255,255);
-  // delay(250);
+  setRGB(25,0,0);
+  delay(25);
+  setRGB(0,25,0);
+  delay(25);
+  setRGB(0,0,25);
+  delay(25);
+  setRGB(25,25,0);
+  delay(25);
+  setRGB(25,0,25);
+  delay(25);
+  setRGB(0,25,25);
+  delay(25);
+  setRGB(25,25,25);
+  delay(25);
   setRGB(0,0,0); 
 }
 
@@ -76,13 +76,37 @@ void blink() {
     delay(2);
   }
   delay(150);
+} 
+
+
+// simple LSFR, 2^16 - 1 period is good enough
+static uint16_t randomState = 0b1000000000000001;
+uint8_t nextBit(){
+  uint8_t nextBit = (randomState ^ (randomState >> 1) ^ (randomState >> 3) ^ (randomState >> 12)) & 0b1;
+  randomState = (nextBit << 15) | (randomState >> 1);
+  return nextBit;
+}
+uint8_t nextBits(uint8_t bits){ // bits <= 8 !!
+  uint8_t nextByte = 0;
+  for(uint8_t i = 0; i < bits; i++){
+    nextByte = (nextByte << 1) | nextBit();
+  }
+  return nextByte;
+}
+
+void setRandomColor(){
+  setRGB(nextBits(7), nextBits(7), nextBits(7));
+  delay(500);
 }
 
 void loop() {
+  nextBit();
   // is pin 3 pulled down by the switch?
-  if (PINB & (1 << PINB3)){
-    delay(250);
+  if (! (PINB & (1 << PINB3))){
+    // do whatever here
+    //blink();
+    setRandomColor(); 
   } else {
-    blink();
+    delay(1);
   }
 }
