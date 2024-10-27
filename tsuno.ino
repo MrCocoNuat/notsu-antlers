@@ -7,8 +7,8 @@ void setup() {
   // 4:OC1B - RGB output B
   // 3:PINB3 - digital input
   DDRB = 0b00010011;
-  // pullup pin 3
-  PORTB = 0b00001000;
+  // pullup pin 2, 3
+  PORTB = 0b00001100;
   
   // save power
   PRR = (1 << PRUSI);
@@ -97,15 +97,41 @@ uint8_t nextBits(uint8_t bits){ // bits <= 8 !!
 void setRandomColor(){
   setRGB(nextBits(7), nextBits(7), nextBits(7));
   delay(500);
+  setRGB(0,0,0);
 }
 
+static uint8_t mode = 0; //should be enum but whatever
 void loop() {
   nextBit();
+
   // is pin 3 pulled down by the switch?
   if (! (PINB & (1 << PINB3))){
-    // do whatever here
-    //blink();
-    setRandomColor(); 
+    switch(mode){
+      case 0: 
+        blink();
+        break;
+      case 1: 
+      setRandomColor();
+    }
+  } else {
+    delay(1);
+  }
+  // is the mode select pin 2 pulled down>
+  if (! (PINB & (1 << PINB2))){
+    switch(mode){
+      case 0: 
+        mode = 1;
+        setRGB(0,25,0);
+        delay(50);
+        setRGB(0,0,0);
+        break;
+      case 1: 
+        mode = 0;
+        setRGB(25,0,0);
+        delay(50);
+        setRGB(0,0,0);
+    }  
+    delay(500);
   } else {
     delay(1);
   }
